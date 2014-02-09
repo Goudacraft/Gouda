@@ -1,0 +1,138 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>All natural numbers</title>
+<script>
+
+var pageSize = 43;
+var numSize = 1000;
+var numbers=[];
+var numTemplates1 = [];
+var numTemplates2 = [];
+
+var tmp = ''+numSize;
+for (var i=0; i<numSize; i++) {
+	numTemplates1[i] = ''+i;
+	numTemplates2[i] = ''+i;
+	while (numTemplates2[i].length<tmp.length-1) {
+		numTemplates2[i]='0'+numTemplates2[i];
+	}
+}
+
+for (var i=0; i<pageSize; i++) {
+	var n = i;
+	var val = [];
+	do {
+		val.splice(0, 0, n%numSize)
+		n=(n/numSize)|0;
+	} while (n>0);
+	numbers[i] = val;
+}
+
+window.onload = refresh;
+
+function next() {
+	numbers[0][numbers[0].length-1]+=pageSize;
+	fixNumbers();
+}
+
+function backSkip() {
+	var toAdd = (Math.random()*numbers[0][0])|0;
+	toAdd = (toAdd/2)|0;
+	numbers[0][0]-=toAdd;
+	for (var i=1; i<numbers[0].length; i++) {
+		numbers[0][i]-=(Math.random()*numSize)|0;
+	}
+	fixNumbers();
+}
+
+function skip() {
+	var toAdd = (Math.random()*numbers[0][0])|0;
+	numbers[0][0]+=toAdd;
+	for (var i=1; i<numbers[0].length; i++) {
+		numbers[0][i]+=(Math.random()*numSize)|0;
+	}
+	fixNumbers();
+}
+
+function prev() {
+	numbers[0][numbers[0].length-1]-=pageSize;
+	fixNumbers();
+}
+
+function fixNumbers() {
+	fix(numbers[0]);
+	for (var i=1; i<pageSize; i++) {
+		numbers[i]=[];
+		for (var j=0; j<numbers[0].length; j++) {
+			numbers[i][j] = numbers[0][j];
+		}
+		numbers[i][numbers[i].length-1]+=i;
+		fix(numbers[i]);
+	}	
+	refresh();
+}
+
+function fix(number) {
+	for (var i=number.length-1; i>=0; i--) {
+		if (number[i]>=0 && number[i]<10) continue;
+		if (i==0) {
+			if (number[i]<0) {
+				number.splice(0, number.length, 0);
+				return;
+			}
+			number.splice(0, 0, 0);
+			i++;
+		}
+		while (number[i]>=numSize) {
+			number[i]-=numSize;
+			number[i-1]+=1;
+		}
+		while (number[i]<0) {
+			number[i]+=numSize;
+			number[i-1]-=1;
+		}
+	}
+	while (number.length>1 && number[0]==[0]) {
+		number.splice(0, 1);
+	}
+}
+
+function add(nstr, toAdd) {
+	return nstr;
+}
+
+function sub(nstr, toSub) {
+	return nstr;
+}
+
+function refresh() {
+	var text = "<pre>";
+	for (var i=0; i<pageSize; i++) {
+		var numStr = numTemplates1[numbers[i][0]];
+		var searchStr = numTemplates1[numbers[i][0]];
+		for (var j=1; j<numbers[i].length; j++) {
+			numStr+=','+numTemplates2[numbers[i][j]];
+			searchStr+=numTemplates2[numbers[i][j]];
+		}
+		text+="<a href='http://google.com/#q="+searchStr+"' target='_blank'>"+numStr+"</a>\r\n";
+	}
+	text+="\r\n"
+	if (numbers[0].length>1 || numbers[0][0]!='0') {
+		text+="<a href='previous' onclick='prev();return false;'>&lt;-- prev</a>"
+		text+=" | "
+	}
+	text+="<a href='next' onclick='next();return false;'>next --&gt;</a>\r\n"
+	if (numbers[0].length>1) {
+		text+="<a href='backSkip' onclick='backSkip();return false;'>&lt;&lt;&lt; skip</a>"
+		text+=" | <a href='skip' onclick='skip();return false;'>skip &gt;&gt;&gt;</a>"
+
+	}
+	text+="\r\n</pre>"
+	document.body.innerHTML = text;
+}
+</script>
+</head>
+<body></body>
+</html>
