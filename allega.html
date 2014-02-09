@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>All EGA images</title>
+<script>
+var canvas;
+var ctx;
+var image;
+var imageData;
+var scale = 2;
+
+var colors=[];
+
+for (var i=0; i<320*200; i++) {
+	colors[i] = 0;
+}
+
+window.onload = init;
+
+function init() {
+	var text = "<canvas id='canvas' width='"+(320*scale)+"' height='"+(200*scale)+"'></canvas>";
+	text+="<pre>\r\n"
+	text+="<a href='prev' onClick='prev();return false;'>&lt;-- prev</a>";
+	text+=" | ";
+	text+="<a href='next' onclick='next();return false;'>next --&gt;</a>\r\n";
+	text+="<a href='random' onclick='random();return false;'>random</a>\r\n";
+	document.body.innerHTML = text;
+	
+
+	canvas = document.getElementById('canvas');
+	ctx = canvas.getContext('2d')
+	image = ctx.createImageData(320*scale, 200*scale);
+	imageData = image.data;
+	refresh();
+}
+
+function refresh() {
+	var id = "";
+	for (var i=0; i<320*200; i++) {
+		id+="0123456789abcdef".charAt(colors[i]);
+	}
+	for (var y=0; y<200*scale; y++) {
+		for (var x=0; x<320*scale; x++) {
+			var i = x+y*320*scale;
+			var col = colors[((x/scale)|0)+((y/scale)|0)*320];
+			var add = 0x55*(col>>3&1);
+			imageData[i*4+0] = 0xaa*(col&1)+add;
+			imageData[i*4+1] = 0xaa*(col>>1&1)+add;
+			imageData[i*4+2] = 0xaa*(col>>2&1)+add;
+			if (col==6) {
+				imageData[i*4+1] = 0x55;
+			}
+			imageData[i*4+3] = 255;
+		}
+	}
+	ctx.putImageData(image, 0, 0);
+}
+
+function next() {
+	colors[0]++;
+	for (var i=0; i<320*200; i++) {
+		if (colors[i]>15) {
+			colors[i]=0;
+			if (i<320*200-1) colors[i+1]++;
+		}
+	}
+	refresh();
+}
+
+function prev() {
+	colors[0]--;
+	for (var i=0; i<320*200; i++) {
+		if (colors[i]<0) {
+			colors[i]=15;
+			if (i<320*200-1) colors[i+1]--;
+		}
+	}
+	refresh();
+}
+
+function random() {
+	for (var i=0; i<320*200; i++) {
+		colors[i]=(Math.random()*16)|0;
+	}
+	refresh();
+}
+</script>
+</head>
+<body></body>
+</html>
